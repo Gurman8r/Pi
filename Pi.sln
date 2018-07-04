@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pibrary", "Pibrary\Pibrary.vcxproj", "{1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PiService", "PiService\PiService.vcxproj", "{FCB493E2-1A20-429B-B1FB-E7875F960203}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83} = {1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DriverTest", "DriverTest\DriverTest.vcxproj", "{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83}.Debug|ARM.ActiveCfg = Debug|ARM
+		{1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83}.Debug|ARM.Build.0 = Debug|ARM
+		{1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83}.Release|ARM.ActiveCfg = Release|ARM
+		{1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83}.Release|ARM.Build.0 = Release|ARM
+		{FCB493E2-1A20-429B-B1FB-E7875F960203}.Debug|ARM.ActiveCfg = Debug|ARM
+		{FCB493E2-1A20-429B-B1FB-E7875F960203}.Debug|ARM.Build.0 = Debug|ARM
+		{FCB493E2-1A20-429B-B1FB-E7875F960203}.Release|ARM.ActiveCfg = Release|ARM
+		{FCB493E2-1A20-429B-B1FB-E7875F960203}.Release|ARM.Build.0 = Release|ARM
+		{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}.Debug|ARM.ActiveCfg = Debug|ARM
+		{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}.Debug|ARM.Build.0 = Debug|ARM
+		{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}.Release|ARM.ActiveCfg = Release|ARM
+		{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1E872EB0-73B2-4D37-B16C-6CE930FF62D6}
+	EndGlobalSection
+EndGlobal

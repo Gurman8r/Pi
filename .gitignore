@@ -1,0 +1,7 @@
+/.vs
+/Pibrary/obj
+/Pibrary/bin
+/Pibrary/*.user
+obj
+bin
+*.user
