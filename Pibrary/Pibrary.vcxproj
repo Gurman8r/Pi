@@ -39,8 +39,10 @@
       <LibraryDependencies>wiringPi</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
-      <Command>gpio export 17 out</Command>
-      <Message>export pin 17 using the gpio utility so that we can execute the blink program without sudo</Message>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
     </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -48,20 +50,23 @@
       <LibraryDependencies>wiringPi</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
-      <Command>gpio export 17 out</Command>
-      <Message>export pin 17 using the gpio utility so that we can execute the blink program without sudo</Message>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
     </RemotePostBuildEvent>
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Bus.cpp" />
+    <ClCompile Include="src\OLED.cpp" />
+    <ClCompile Include="src\Pin.cpp" />
     <ClCompile Include="src\FileSystem.cpp" />
-    <ClCompile Include="src\LiquidCrystal_I2C.cpp" />
+    <ClCompile Include="src\LCD_I2C.cpp" />
     <ClCompile Include="src\MCP23017.cpp" />
     <ClCompile Include="src\Net.cpp" />
-    <ClCompile Include="src\PiGPIO.cpp" />
-    <ClCompile Include="src\Pin.cpp" />
     <ClCompile Include="src\TimePoint.cpp" />
     <ClCompile Include="src\Timer.cpp" />
   </ItemGroup>
@@ -69,13 +74,16 @@
     <ClInclude Include="include\Bus.h" />
     <ClInclude Include="include\Export.h" />
     <ClInclude Include="include\FileSystem.h" />
-    <ClInclude Include="include\LiquidCrystal_I2C.h" />
+    <ClInclude Include="include\INIReader.h" />
+    <ClInclude Include="include\LCD_I2C.h" />
     <ClInclude Include="include\MCP23017.h" />
     <ClInclude Include="include\Net.h" />
-    <ClInclude Include="include\PiGPIO.h" />
-    <ClInclude Include="include\Pin.h" />
+    <ClInclude Include="include\OLED.h" />
+    <ClInclude Include="include\OLED_Commands.h" />
+    <ClInclude Include="include\OLED_Fonts.h" />
     <ClInclude Include="include\TimePoint.h" />
     <ClInclude Include="include\Timer.h" />
+    <ClInclude Include="include\Pin.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>

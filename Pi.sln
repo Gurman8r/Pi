@@ -10,8 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PiService", "PiService\PiSe
 		{1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83} = {1580D7AD-03E2-4BB5-91BF-B8E8A6B0FA83}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DriverTest", "DriverTest\DriverTest.vcxproj", "{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -26,10 +24,6 @@ Global
 		{FCB493E2-1A20-429B-B1FB-E7875F960203}.Debug|ARM.Build.0 = Debug|ARM
 		{FCB493E2-1A20-429B-B1FB-E7875F960203}.Release|ARM.ActiveCfg = Release|ARM
 		{FCB493E2-1A20-429B-B1FB-E7875F960203}.Release|ARM.Build.0 = Release|ARM
-		{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}.Debug|ARM.ActiveCfg = Debug|ARM
-		{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}.Debug|ARM.Build.0 = Debug|ARM
-		{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}.Release|ARM.ActiveCfg = Release|ARM
-		{D4C42810-B82A-4022-8E8A-AF07BAF7EE8E}.Release|ARM.Build.0 = Release|ARM
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

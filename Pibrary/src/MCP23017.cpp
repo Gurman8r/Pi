@@ -3,23 +3,31 @@
 #include <wiringPiI2C.h>
 #include <stdio.h>
 
+#define WRITE_DELAY 1
+
 namespace pi
 {
 	MCP23017::MCP23017()
 		: m_addr(-1)
 		, m_handle(-1)
+		, m_ioa(0)
+		, m_iob(0)
 	{
 	}
 
 	MCP23017::MCP23017(int addr)
 		: m_addr(addr)
 		, m_handle(-1)
+		, m_ioa(0)
+		, m_iob(0)
 	{
 	}
 
 	MCP23017::MCP23017(const MCP23017 & copy)
 		: m_addr(copy.m_addr)
 		, m_handle(copy.m_handle)
+		, m_ioa(copy.m_ioa)
+		, m_iob(copy.m_iob)
 	{
 	}
 
@@ -28,108 +36,10 @@ namespace pi
 	}
 
 
-	bool MCP23017::getPin(unsigned pin) const
-	{
-		if (pin < MCP23017::A_MAX)
-		{
-			int bit = (1 << (pin & 7));
-
-			return getA() & bit;
-		}
-		else if (pin < MCP23017::B_MAX)
-		{
-			int bit = (1 << ((pin - 8) & 7));
-
-			return getA() & bit;
-		}
-		return -1;
-	}
-
-	int MCP23017::getPud(unsigned pin) const
-	{
-		if (pin < MCP23017::A_MAX)
-		{
-			int bit = (1 << (pin & 7));
-
-			return getReg(MCP23017::GPPUA) & bit;
-		}
-		else if (pin < MCP23017::B_MAX)
-		{
-			int bit = (1 << ((pin - 8) & 7));
-
-			return getReg(MCP23017::GPPUB) & bit;
-		}
-		return -1;
-	}
-
-	MCP23017 & MCP23017::setPin(unsigned pin, bool value)
-	{
-		if (pin < MCP23017::A_MAX)
-		{
-			int bit = (1 << (pin & 7));
-			if (value)
-			{
-				return setA(m_reg[MCP23017::OLATA] | bit);
-			}
-			else
-			{
-				return setA(m_reg[MCP23017::OLATA] & (~bit));
-			}
-		}
-		else if (pin < MCP23017::B_MAX)
-		{
-			int bit = (1 << ((pin - 8) & 7));
-			if (value)
-			{
-				return setB(m_reg[MCP23017::OLATB] | bit);
-			}
-			else
-			{
-				return setB(m_reg[MCP23017::OLATB] & (~bit));
-			}
-		}
-		return (*this);
-	}
-
-	MCP23017 & MCP23017::setPud(unsigned pin, int value)
-	{
-		if (pin < MCP23017::A_MAX)
-		{
-			int bit = (1 << (pin & 7));
-			if (value)
-			{
-				return setReg(MCP23017::GPPUA, m_reg[MCP23017::GPPUA] | bit);
-			}
-			else
-			{
-				return setReg(MCP23017::GPPUA, m_reg[MCP23017::GPPUA] & (~bit));
-			}
-		}
-		else if(pin < MCP23017::B_MAX)
-		{
-			int bit = (1 << ((pin - 8) & 7));
-			if (value)
-			{
-				return setReg(MCP23017::GPPUB, m_reg[MCP23017::GPPUB] | bit);
-			}
-			else
-			{
-				return setReg(MCP23017::GPPUB, m_reg[MCP23017::GPPUB] & (~bit));
-			}
-		}
-		return (*this);
-	}
-	
-	
 	bool MCP23017::setup()
 	{
 		if ((m_handle = wiringPiI2CSetup(m_addr)) >= 0)
 		{
-			for (int i = 0; i < MCP23017::MAX_PIN; i++)
-			{
-				m_pins[i].bus(this).addr(i).mode(OUTPUT).pud(PUD_OFF);
-			}
-
 			return true;
 		}
 		return false;
@@ -138,12 +48,12 @@ namespace pi
 
 	MCP23017 & MCP23017::clearA()
 	{
-		return setReg(MCP23017::OLATA, 0);
+		return writeA(0);
 	}
 
 	MCP23017 & MCP23017::clearB()
 	{
-		return setReg(MCP23017::OLATB, 0);
+		return writeB(0);
 	}
 
 	MCP23017 & MCP23017::clearAB()
@@ -152,105 +62,104 @@ namespace pi
 	}
 
 
-	MCP23017 & MCP23017::setA(int value)
+	MCP23017 & MCP23017::setPin(unsigned pin, bool value)
 	{
-		return setReg(MCP23017::OLATA, value);
+		return (pin < 8) ? setPinA(pin, value) : setPinB(pin - 8, value);
 	}
-	
-	MCP23017 & MCP23017::setB(int value)
+
+	MCP23017 & MCP23017::setPinA(unsigned pin, bool value)
 	{
-		return setReg(MCP23017::OLATB, value);
-	}
-	
-	MCP23017 & MCP23017::setAB(int i)
-	{
-		return setA((char)(i & 0xFF)).setB((char)(((i >> 8) & 0xFF)));
-	}
-				 
-	MCP23017 & MCP23017::setReg(int reg, int value)
-	{
-		m_reg[reg] = value;
-		wiringPiI2CWriteReg8(handle(), reg, value);
+		if (pin < 8)
+		{
+			if (value)
+			{
+				m_ioa |= 1UL << pin;
+			}
+			else
+			{
+				m_ioa &= ~(1UL << pin);
+			}
+			return writeA(m_ioa);
+		}
 		return (*this);
 	}
-	
-	
-	int MCP23017::getA() const
+
+	MCP23017 & MCP23017::setPinB(unsigned pin, bool value)
 	{
-		return getReg(MCP23017::GPIOA);
-	}
-	
-	int MCP23017::getB() const
-	{
-		return getReg(MCP23017::GPIOB);
+		if (pin < 8)
+		{
+			if (value)
+			{
+				m_iob |= 1UL << pin;
+			}
+			else
+			{
+				m_iob &= ~(1UL << pin);
+			}
+			return writeB(m_iob);
+		}
+		return (*this);
 	}
 
-	int MCP23017::getReg(int reg) const
+
+	MCP23017 & MCP23017::writeA(int value)
 	{
-		return (m_reg[reg] = wiringPiI2CReadReg8(handle(), reg));
+		return writeReg8(MCP23017::GPIOA, value);
+	}
+
+	MCP23017 & MCP23017::writeB(int value)
+	{
+		return writeReg8(MCP23017::GPIOB, value);
+	}
+
+	MCP23017 & MCP23017::writeAB(int i)
+	{
+		return writeA((char)(i & 0xFF)).writeB((char)(((i >> 8) & 0xFF)));
+	}
+
+	MCP23017 & MCP23017::writeReg8(int reg, int value)
+	{
+		switch (reg)
+		{
+		case MCP23017::GPIOA:
+		case MCP23017::OLATA:
+			m_ioa = value;
+			break;
+		case MCP23017::GPIOB:
+		case MCP23017::OLATB:
+			m_iob = value;
+			break;
+		}
+
+		wiringPiI2CWriteReg8(handle(), reg, static_cast<char>(value));
+		delayMicroseconds(WRITE_DELAY);
+		return (*this);
 	}
 
 
-	// * Pins * * * * * * * * * * * * //
-
-	const Pin & MCP23017::operator[](unsigned index) const
+	bool MCP23017::getPin(unsigned pin) const
 	{
-		return m_pins.at(index);
+		return (pin < 8) ? getPinA(pin) : getPinB(pin - 8);
 	}
 
-	Pin & MCP23017::operator[](unsigned index)
+	bool MCP23017::getPinA(unsigned pin) const
 	{
-		return m_pins[index];
+		return (pin < 8) ? ((readA() >> pin) & 1UL) : false;
 	}
 
-		
-	MCP23017::iterator MCP23017::begin()
+	bool MCP23017::getPinB(unsigned pin) const
 	{
-		return m_pins.begin();
+		return (pin < 8) ? ((readB() >> pin) & 1UL) : false;
 	}
-	
-	MCP23017::iterator MCP23017::end()
+
+
+	int MCP23017::readA() const
 	{
-		return m_pins.end();
+		return (m_ioa = wiringPiI2CReadReg8(handle(), MCP23017::GPIOA));
 	}
-	
-	MCP23017::const_iterator MCP23017::begin() const
+
+	int MCP23017::readB() const
 	{
-		return m_pins.begin();
-	}
-	
-	MCP23017::const_iterator MCP23017::end() const
-	{
-		return m_pins.end();
-	}
-	
-	MCP23017::const_iterator MCP23017::cbegin() const
-	{
-		return m_pins.cbegin();
-	}
-	
-	MCP23017::const_iterator MCP23017::cend() const
-	{
-		return m_pins.cend();
-	}
-	
-	MCP23017::reverse_iterator MCP23017::rbegin()
-	{
-		return m_pins.rbegin();
-	}
-	
-	MCP23017::reverse_iterator MCP23017::rend()
-	{
-		return m_pins.rend();
-	}
-	
-	MCP23017::const_reverse_iterator MCP23017::crbegin() const
-	{
-		return m_pins.crbegin();
-	}
-	
-	MCP23017::const_reverse_iterator MCP23017::crend() const
-	{
-		return m_pins.crend();
+		return (m_iob = wiringPiI2CReadReg8(handle(), MCP23017::GPIOB));
 	}
 }

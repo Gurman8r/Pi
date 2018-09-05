@@ -1,33 +1,47 @@
-#include <wiringPi.h>
 #include <Pin.h>
-#include <Bus.h>
+#include <wiringPi.h>
 
 namespace pi
 {
+	const char Pin::IODIR_IDs[Pin::MAX_IODIR] =
+	{
+		'I','O'
+	};
+
+	const char Pin::PUDC_IDs[Pin::MAX_PUDC] = 
+	{ 
+		'-','D','U'
+	};
+
 	Pin::Pin()
-		: m_bool(false)
-		, m_bus(0)
-		, m_addr(0)
-		, m_mode(INPUT)
-		, m_pud(PUD_OFF)
+		: m_adr(0)
+		, m_dir(IOD::In)
+		, m_pud(PUD::Off)
+		, m_bit(false)
 	{
 	}
 
-	Pin::Pin(Bus * bus, int addr, int mode, int pud)
-		: m_bool(false)
-		, m_bus(bus)
-		, m_addr(addr)
-		, m_mode(mode)
+	Pin::Pin(int adr, int dir, int pud)
+		: m_adr(adr)
+		, m_dir((IOD)dir)
+		, m_pud((PUD)pud)
+		, m_bit(0)
+	{
+	}
+
+	Pin::Pin(int adr, bool bit, IOD dir, PUD pud)
+		: m_adr(adr)
+		, m_dir(dir)
 		, m_pud(pud)
+		, m_bit(bit)
 	{
 	}
 
 	Pin::Pin(const Pin & copy)
-		: m_bool(copy.m_bool)
-		, m_bus(copy.m_bus)
-		, m_addr(copy.m_addr)
-		, m_mode(copy.m_mode)
+		: m_adr(copy.m_adr)
+		, m_dir(copy.m_dir)
 		, m_pud(copy.m_pud)
+		, m_bit(copy.m_bit)
 	{
 	}
 
@@ -35,67 +49,96 @@ namespace pi
 	{
 	}
 
+	void Pin::write() const
+	{
+		digitalWrite(getAdr(), getBit());
+	}
 
-	const int&	Pin::addr() const
+	void Pin::read()
 	{
-		return m_addr;
+		setBit(digitalRead(getAdr()));
 	}
-	const Bus*	Pin::bus()  const
+
+	
+	Pin & Pin::setAdr(int value)
 	{
-		return m_bus;
+		m_adr = value;
+		return (*this);
 	}
-	const bool&	Pin::get()  const
+
+	Pin & Pin::setBit(bool value)
 	{
-		if (m_bus)
-		{
-			return (m_bool = m_bus->getPin(m_addr));
-		}
-		return m_bool;
+		m_bit = value;
+		return (*this);
 	}
-	const int&	Pin::mode() const
+	
+	Pin & Pin::setDir(int value)
 	{
-		return m_mode;
+		pinMode(getAdr(), (m_dir = (IOD)value));
+		return (*this);
 	}
-	const int&	Pin::pud()  const
+
+	Pin & Pin::setPud(int value)
 	{
-		if (m_bus)
-		{
-			return (m_pud = m_bus->getPud(m_addr));
-		}
+		pullUpDnControl(getAdr(), (m_pud = (PUD)value));
+		return (*this);
+	}
+
+
+	const int &			Pin::getAdr() const
+	{
+		return m_adr;
+	}
+
+	const bool &		Pin::getBit() const
+	{
+		return m_bit;
+	}
+
+	const Pin::IOD &	Pin::getDir() const
+	{
+		return m_dir;
+	}
+
+	const Pin::PUD &	Pin::getPud() const
+	{
 		return m_pud;
 	}
 
-	Pin& Pin::addr(int value)
+
+	Pin &	Pin::operator=(bool value)
 	{
-		m_addr = value;
-		return (*this);
+		return setBit(value);
 	}
-	Pin& Pin::bus(Bus* value)
+
+	Pin &	Pin::operator=(const Pin & copy)
 	{
-		m_bus = value;
-		return (*this);
+		return setBit(copy.getBit());
 	}
-	Pin& Pin::set(bool value)
+
+	bool	Pin::operator*() const
 	{
-		if (m_bus)
+		return getBit();
+	}
+
+
+	std::ostream & operator<<(std::ostream & out, const Pin & pin)
+	{
+		return out
+			<< " adr:" << pin.getAdr()
+			<< " val:" << pin.getBit()
+			<< " dir:" << pin.getDir()
+			<< " pud:" << pin.getPud();
+	}
+
+	std::istream & operator>>(std::istream & in, Pin & pin)
+	{
+		if (in.good())
 		{
-			m_bus->setPin(m_addr, m_bool = value);
-			return (*this);
+			bool bit;
+			in >> bit;
+			pin = bit;
 		}
-		return (*this);
-	}
-	Pin& Pin::mode(int value)
-	{
-		m_mode = value;
-		return (*this);
-	}
-	Pin& Pin::pud(int value)
-	{
-		if (m_bus)
-		{
-			m_bus->setPud(m_addr, m_pud = value);
-			return (*this);
-		}
-		return (*this);
+		return in;
 	}
 }

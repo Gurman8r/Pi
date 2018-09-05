@@ -18,4 +18,9 @@
 	#define PI_API PI_API_IMPORT
 #endif
 
+namespace pi
+{
+	using byte = unsigned short;
+}
+
 #endif // !_PIBRARY_EXPORT_H_

@@ -1,4 +1,4 @@
-#include <LiquidCrystal_I2C.h>
+#include <LCD_I2C.h>
 #include <wiringPiI2C.h>
 #include <wiringPi.h>
 #include <stdarg.h>
@@ -95,7 +95,7 @@ static const int RowOff[4] = { 0x00, 0x40, 0x14, 0x54 };
 
 namespace pi
 {
-	LiquidCrystal_I2C::LiquidCrystal_I2C()
+	LCD_I2C::LCD_I2C()
 		: m_address(-1)
 		, m_handle(-1)
 		, m_w(0)
@@ -105,7 +105,7 @@ namespace pi
 	{
 	}
 
-	LiquidCrystal_I2C::LiquidCrystal_I2C(int address, int getW, int getH)
+	LCD_I2C::LCD_I2C(int address, int getW, int getH)
 		: m_address(address)
 		, m_handle(-1)
 		, m_w(getW)
@@ -115,7 +115,7 @@ namespace pi
 	{
 	}
 
-	LiquidCrystal_I2C::LiquidCrystal_I2C(const LiquidCrystal_I2C & copy)
+	LCD_I2C::LCD_I2C(const LCD_I2C & copy)
 		: m_address(copy.m_address)
 		, m_handle(copy.m_handle)
 		, m_w(copy.m_w)
@@ -125,12 +125,12 @@ namespace pi
 	{
 	}
 
-	LiquidCrystal_I2C::~LiquidCrystal_I2C()
+	LCD_I2C::~LCD_I2C()
 	{
 	}
 
 
-	bool LiquidCrystal_I2C::setup()
+	bool LCD_I2C::setup()
 	{
 		if ((m_handle = wiringPiI2CSetup(m_address)) >= 0)
 		{
@@ -152,7 +152,7 @@ namespace pi
 	}
 
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::blink(bool value)
+	LCD_I2C & LCD_I2C::blink(bool value)
 	{
 		if (value)
 		{
@@ -164,12 +164,12 @@ namespace pi
 		}
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::clear()
+	LCD_I2C & LCD_I2C::clear()
 	{
 		return sendCommand(CMD_CLEAR);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::cursor(bool value)
+	LCD_I2C & LCD_I2C::cursor(bool value)
 	{
 		if (value)
 		{
@@ -181,7 +181,7 @@ namespace pi
 		}
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::display(int value)
+	LCD_I2C & LCD_I2C::display(int value)
 	{
 		delayMicroseconds(DELAY_DISP);
 
@@ -194,17 +194,17 @@ namespace pi
 		return (*this);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::home()
+	LCD_I2C & LCD_I2C::home()
 	{
 		return sendCommand(CMD_HOME);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::modPos(int dx, int dy)
+	LCD_I2C & LCD_I2C::modPos(int dx, int dy)
 	{
 		return setPos(getX() + dx, getY() + dy);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::setPos(int x, int y)
+	LCD_I2C & LCD_I2C::setPos(int x, int y)
 	{
 		if (x >= 0 && x < m_w)
 		{
@@ -235,23 +235,48 @@ namespace pi
 		return sendCommand(m_x + (CMD_DG_RAM | RowOff[m_y]));
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::setX(int value)
+	LCD_I2C & LCD_I2C::setX(int value)
 	{
 		return setPos(value, getY());
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::setY(int value)
+	LCD_I2C & LCD_I2C::setY(int value)
 	{
 		return setPos(getX(), value);
 	}
 
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::print(char value)
+	LCD_I2C & LCD_I2C::print(int value)
 	{
-		return sendData(value);
+		return printf("%d", value);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::print(const char * value)
+	LCD_I2C & LCD_I2C::print(double value)
+	{
+		return printf("%d", value);
+	}
+
+	LCD_I2C & LCD_I2C::print(float value)
+	{
+		return printf("%4.2f", value);
+	}
+	
+	LCD_I2C & LCD_I2C::print(char value)
+	{
+		switch (value)
+		{
+		case '\n':
+			return setPos(getX(), getY() + 1);
+
+		case '\t':
+			return setPos(getX() + 4, getY());
+
+		default:
+			return sendData(value);
+		}
+	}
+
+	LCD_I2C & LCD_I2C::print(const char * value)
 	{
 		while (*value)
 		{
@@ -260,12 +285,12 @@ namespace pi
 		return (*this);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::print(const std::string & value)
+	LCD_I2C & LCD_I2C::print(const std::string & value)
 	{
 		return print(value.c_str());
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::printf(const char * fmt, ...)
+	LCD_I2C & LCD_I2C::printf(const char * fmt, ...)
 	{
 		va_list argp;
 		char buffer[1024];
@@ -277,18 +302,18 @@ namespace pi
 		return print(buffer);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::print8(int value)
+	LCD_I2C & LCD_I2C::print8(int value)
 	{
 		return printf(B2BIN_PAT, B2BIN(value));
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::print16(int value)
+	LCD_I2C & LCD_I2C::print16(int value)
 	{
 		return printf(S2BIN_PAT, S2BIN(value));
 	}
 	
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::sendByte(int value, int mode)
+	LCD_I2C & LCD_I2C::sendByte(int value, int mode)
 	{
 		// High bits
 		int bitsHi = mode | (value & 0xF0) | CMD_DISP_CTL;
@@ -308,12 +333,12 @@ namespace pi
 		return (*this);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::sendCommand(int value)
+	LCD_I2C & LCD_I2C::sendCommand(int value)
 	{
 		return sendByte(value, 0);
 	}
 
-	LiquidCrystal_I2C & LiquidCrystal_I2C::sendData(int value)
+	LCD_I2C & LCD_I2C::sendData(int value)
 	{
 		return sendByte(value, 1);
 	}

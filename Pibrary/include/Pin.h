@@ -3,68 +3,95 @@
 
 #include <Export.h>
 #include <iostream>
+#include <string>
+#include <cassert>
 
 namespace pi
 {
-	class Bus;
-
+	// Represents a single bit in a register
 	class PI_API Pin
 	{
 	public:
+		enum IOD : int // IO Direction
+		{
+			INVALID_IODIR = -1,
+			In, Out,
+			MAX_IODIR
+		};
+		enum PUD : int // Pull Up/Down Control
+		{
+			INVALID_PUDC = -1,
+			Off, Down, Up,
+			MAX_PUDC
+		};
+		
+		static const char IODIR_IDs[MAX_IODIR];
+		static const char PUDC_IDs[MAX_PUDC];
+
+		inline friend std::ostream& operator<<(std::ostream& out, const IOD& value)
+		{
+			return (out << Pin::IODIR_IDs[value]);
+		}
+		inline friend std::ostream& operator<<(std::ostream& out, const PUD& value)
+		{
+			return (out << Pin::PUDC_IDs[value]);
+		}
+
+	public:
 		Pin();
-		Pin(Bus* bus, int addr, int mode, int pud);
+		Pin(int adr, int dir, int pud);
+		Pin(int adr, bool bit, IOD dir, PUD pud);
 		Pin(const Pin& copy);
-		~Pin();
+		virtual ~Pin();
 
-		const int&	addr() const;
-		const Bus*	bus()  const;
-		const bool&	get()  const;
-		const int&	mode() const;
-		const int&	pud()  const;
+		virtual void write() const;
+		virtual void read();
 
-		Pin& addr(int value);
-		Pin& bus(Bus* value);
-		Pin& set(bool value);
-		Pin& mode(int value);
-		Pin& pud(int value);
+		virtual Pin& setAdr(int value);
+		virtual Pin& setBit(bool value);
+		virtual Pin& setDir(int value);
+		virtual Pin& setPud(int value);
 
-		inline Pin& operator=(bool value)
-		{
-			return set(value);
-		}
-		inline bool operator*() const
-		{
-			return get();
-		}
+		virtual const int&		getAdr() const;
+		virtual const bool&		getBit() const;
+		virtual const IOD&		getDir() const;
+		virtual const PUD&		getPud() const;
 
-		inline friend std::ostream& operator<<(std::ostream& out, const Pin& pin)
-		{
-			return (out << pin.get());
-		}
-		inline friend bool operator==(const Pin& lhs, const Pin& rhs)
-		{
-			return lhs.get() == rhs.get();
-		}
-		inline friend bool operator!=(const Pin& lhs, const Pin& rhs)
-		{
-			return !(lhs == rhs);
-		}
-		inline friend bool operator==(const Pin& lhs, bool rhs)
-		{
-			return lhs.get() == rhs;
-		}
-		inline friend bool operator!=(const Pin& lhs, bool rhs)
-		{
-			return !(lhs == rhs);
-		}
+		virtual Pin& operator=(bool value);
+		virtual Pin& operator=(const Pin& copy);
+		virtual bool operator*() const;
 
-	private:
-		mutable Bus*	m_bus;	// master device
-		mutable int		m_addr;	// pin number
-		mutable int		m_mode;	// pin mode
-		mutable int		m_pud;	// pull up/down control		
-		mutable bool	m_bool; // value of pin
+		friend std::ostream& operator<<(std::ostream& out, const Pin& pin);
+		friend std::istream& operator>>(std::istream& in, Pin& pin);
+
+	protected:
+		int		m_adr;  // Address
+		IOD		m_dir;  // I/O Direction
+		PUD		m_pud;  // Pull Up/Down Control
+		bool	m_bit;  // Pin Value
 	};
+
+	
+	inline bool operator==(const Pin& lhs, const Pin& rhs)
+	{
+		return lhs.getBit() == rhs.getBit();
+	}
+
+	inline bool operator!=(const Pin& lhs, const Pin& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	inline bool operator==(const Pin& lhs, bool rhs)
+	{
+		return lhs.getBit() == rhs;
+	}
+
+	inline bool operator!=(const Pin& lhs, bool rhs)
+	{
+		return !(lhs == rhs);
+	}
+	
 }
 
 #endif // !_PIN_H_
